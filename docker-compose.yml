@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+    nginx:
+        build: docker/nginx
+        ports:
+            - "80:80"
+        links:
+            - php-fpm
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/systemio.conf/:/etc/nginx/conf.d/systemio.conf
+            - ./logs:/var/log
+        working_dir:
+            /var/www
+
+    php-fpm:
+        build: docker/php-fpm
+        links:
+            - db
+        volumes:
+            - ./:/var/www
+        working_dir:
+            /var/www
+
+    db:
+        image: postgres:latest
+        ports:
+            - "5433:5432"
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: 1234
+            POSTGRES_DB: systemio
+
+volumes:
+    mysql-data:
+        driver: local
