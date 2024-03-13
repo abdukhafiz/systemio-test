@@ -1,64 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Написать Symfony REST приложение для расчета цены продукта и проведения оплаты
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Необходимо написать 2 эндпоинта:
+1. POST: для расчёта цены
 
-## About Laravel
+http://127.0.0.1:80/calculate-price
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Пример json тела запроса:
+```
+{
+    "product": 1,
+    "taxNumber": "DE123456789",
+    "couponCode": "D15"
+}
+```
+2. POST: для выполнения покупки
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+http://127.0.0.1:80/purchase
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Пример json тела запроса:
+```
+{
+    "product": 1,
+    "taxNumber": "IT12345678900",
+    "couponCode": "D15",
+    "paymentProcessor": "paypal"
+}
+```
 
-## Learning Laravel
+При успешном выполнении запроса вернуть HTTP ответ с кодом 200.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+При неверных входных данных или ошибках оплаты вернуть HTTP ответ с кодом 400 и json объект с ошибками.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Продукты
+Предполагается, что продукты хранятся в БД, для примера можно взять 3 продукта:
+- Iphone (100 евро)
+- Наушники (20 евро)
+- Чехол (10 евро)
 
-## Laravel Sponsors
+## Купоны
+При наличии купона покупатель может применить его к покупке.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Купон может быть двух типов:
+- фиксированная сумма скидки
+- процент от суммы покупки
 
-### Premium Partners
+Мы подразумеваем, что купоны создаются продавцом и где-то хранятся (ну или захардкодены, на ваше усмотрение)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+т.е. не должно быть ситуации, когда код купона определяет скидку и покупатель может подставить любой код купона.
 
-## Contributing
+Например, при наличии (в БД или в виде хардкода) купонов P10 (скидка 10%) и P100 (скидка 100%) у покупателя не должно быть возможности применить купон P50, если он не хранится явным образом.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Код купона не обязательно должен соответствовать какому-либо формату. Вы можете выбрать его на своё усмотрение.
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Расчет налога
+При покупке продукта получатель сверх цены продукта должен уплатить налог, относительно страны налогового номера:
+- Германии - 19%
+- Италии - 22%
+- Франции - 20%
+- Греции - 24%
 
-## Security Vulnerabilities
+В итоге для покупателя Iphone из Греции цена составляет 124 евро (цена продукта 100 евро + налог 24%).  
+Если у покупателя есть купон на 6% скидку на покупку, то цена будет 116.56 евро (цена продукта 100 евро - 6% скидка + налог 24%).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Формат налогового номера
+DEXXXXXXXXX - для жителей Германии,
 
-## License
+ITXXXXXXXXXXX - для жителей Италии,
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+GRXXXXXXXXX - для жителей Греции,
+
+FRYYXXXXXXXXX - для жителей Франции
+
+где:
+- первые два символа - это код страны,
+- X - любая цифра от 0 до 9,
+- Y - любая буква
+
+Обратите внимание, что длина налогового номера разная для разных стран.  
+Форматы налоговых номеров могут меняться, что случается редко. (Это зависит от законодательства.)
+
+## Детали
+При выполнении задания нужно:
+- реализовать валидацию всех полей (в том числе корректность tax номера согласно формату) в теле запросов, используя Symfony validator
+- рассчитать итоговую цену покупки вместе с купоном (если указан) и налогом
+- использовать для проведения платежа `PaypalPaymentProcessor::pay()` или `StripePaymentProcessor::processPayment()`  
+  Эти классы представлены в этом проекте, использовать следует именно их. В методах оплаты они принимают цену как в разных юнитах (как в центах, так и в долларах).
+    - ИЛИ скопируйте их себе в проект. Для простоты представьте, что эти два класса входят в два разных сторонних SDK, и у вас **нет возможности править эти классы или какую-либо логику внутри них**.
+    - ИЛИ добавьте `systemeio/test-for-candidates` как зависимость через Composer.
+- приложить в README.md примеры HTTP-запросов к двум эндпоинтам: path и тело запроса (для ручного тестирования) в формате curl команды
+
+CRUD для сущностей писать не нужно, будем считать что он "есть" и данные в БД валидны, т.е. проверок в сервисах, что процентная скидка по купону больше 0, меньше 1000 и прочих подобных делать не нужно.
+
+При написании тестового используйте git, после выполнения пришлите ссылку на репозиторий.
+
+Необходимо учесть возможность добавления новых PaymentProcessors.
+
+Если вы чувствуете, что определённая часть задания требует у вас много времени на выполнение, вы можете выбрать наиболее простое решение и комментарием указать возможные варианты реализации, которые вы рассматриваете
+
+### Будет плюсом
+- использование контейнеризации для php, postgres/mysql
+- наличие PHPUnit tests
+- соответствие кода принципам SOLID (без фанатизма)
+- покоммитное оформление этапов реализации приветствуется
+- продемонстрированное умение **НЕ!** использовать подходы вроде onion-based/DDD/CQS/гексагональной архитектуры при выполнении задания: мы куда больше ценим его корректность и полноту; такие сложные концепции в нашем задании скорее не уместны
+
+Мы не ограничиваем вас по срокам выполнения задания, но при этом ожидаем, что в тестовом задании вы раскроете принципы, которых придерживаетесь в работе. 

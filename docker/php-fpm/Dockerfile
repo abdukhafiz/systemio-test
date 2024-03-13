@@ -30,7 +30,9 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Mysql PDO
 RUN docker-php-ext-install mysqli && \
-    docker-php-ext-install pdo_mysql
+    docker-php-ext-install pdo_mysql && \
+    docker-php-ext-install pdo && \
+    docker-php-ext-install pdo_pgsql
 
 # Required if need manipulate images
 RUN docker-php-ext-configure exif \
