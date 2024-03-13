@@ -31,7 +31,7 @@ class CouponSeeder extends Seeder
                 'name' => 'Coupon 3',
                 'type' => 0,                // fixed
                 'code' => 'COUPON3',
-                'amount' => '50'
+                'amount' => '13'
             ],
         ];
 

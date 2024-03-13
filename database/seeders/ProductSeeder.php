@@ -17,7 +17,7 @@ class ProductSeeder extends Seeder
         $products = [
             [
                 'name' => 'Product 1',
-                'price' => 10.99,
+                'price' => 150.99,
             ],
             [
                 'name' => 'Product 2',
