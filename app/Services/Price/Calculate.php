@@ -41,7 +41,7 @@ class Calculate
             }
         }
 
-        return $price + ($price * $tax);
+        return round($price + ($price * $tax), 2);
     }
 
     /**
@@ -52,7 +52,7 @@ class Calculate
     private function calcTax()
     {
         $countryTax = new Tax($this->taxNumber);
-        return $countryTax->getTax() / 100;
+        return $countryTax->getTax();
     }
 
     /**

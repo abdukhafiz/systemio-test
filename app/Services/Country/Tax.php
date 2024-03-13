@@ -24,7 +24,7 @@ class Tax
     public function getTax()
     {
         if (!empty($this->country)) {
-            return $this->country->tax / 100;
+            return $this->country->tax_percent / 100;
         }
         return 0.0;
     }
