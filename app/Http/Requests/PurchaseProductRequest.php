@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CountryWithTaxExistsRule;
+use App\Rules\CouponExistsRule;
+use App\Rules\ProductExistsRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PurchaseProductRequest extends FormRequest
@@ -13,7 +16,7 @@ class PurchaseProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +27,10 @@ class PurchaseProductRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'product' => ['required', new ProductExistsRule()],
+            'taxNumber' => ['required', new CountryWithTaxExistsRule()],
+            'paymentProcessor' => ['required'],
+            'coupon' => [new CouponExistsRule()]
         ];
     }
 }

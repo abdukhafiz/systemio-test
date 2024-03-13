@@ -1,5 +1,36 @@
 # Написать Symfony REST приложение для расчета цены продукта и проведения оплаты
 
+# Проект написан на Laravel!
+- Клонировать проект
+- Установить зависимости через composer
+- Запустить миграцию через команду ``php artisan migrate``
+- Запустить сидер через команду ``php artisan db:seed``
+
+### Первый эндпоинт
+URL (POST): http://localhost/api/v1/calculate-price
+Тело запроса:
+```
+{
+    "product": id из таблицы products,
+    "taxNumber": tax_format из таблицы countries,
+    "couponCode": code из таблицы coupons
+}
+```
+
+### Второй эндпоинт
+URL (POST): http://localhost/api/v1/purchase
+Тело запроса:
+```
+{
+    "product": id из таблицы products,
+    "taxNumber": tax_format из таблицы countries,
+    "couponCode": code из таблицы coupons
+    "paymentProcessor": "paypal" ИЛИ "stripe"
+}
+```
+
+---
+
 Необходимо написать 2 эндпоинта:
 1. POST: для расчёта цены
 

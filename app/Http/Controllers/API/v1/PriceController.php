@@ -13,7 +13,7 @@ class PriceController extends Controller
     public function calculate(CalculatePriceRequest $request)
     {
         $calculate = new Calculate($request->product, $request->taxNumber, $request->coupon);
-        return response($calculate->price(), 200);
+        return response(['message' => 'Price calculated successfully', 'price' => $calculate->price()], 200);
     }
 
 }
